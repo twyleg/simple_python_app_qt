@@ -1,4 +1,4 @@
-from template_project_python import __version__
+from simple_python_app import __version__
 
 extensions = [
     "sphinx.ext.autodoc",
@@ -9,7 +9,7 @@ extensions = [
 html_theme = "sphinx_rtd_theme"
 
 master_doc = "index"
-project = "template_project_python"
+project = "simple_python_app"
 copyright = "2023, twyleg"
 author = "Torsten Wylegala"
 version = release = __version__

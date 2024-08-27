@@ -1,4 +1,4 @@
-template_project_python
+simple_python_app
 =======================
 
 Lorem ipsum

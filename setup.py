@@ -1,4 +1,4 @@
-# Copyright (C) 2023 twyleg
+# Copyright (C) 2024 twyleg
 import versioneer
 from pathlib import Path
 from setuptools import find_packages, setup
@@ -13,7 +13,7 @@ def read_long_description() -> str:
 
 
 setup(
-    name="template_project_python",
+    name="simple_python_app",
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     author="Torsten Wylegala",
@@ -21,15 +21,11 @@ setup(
     description="",
     license="GPL 3.0",
     keywords="",
-    url="https://github.com/twyleg/template_project_python",
+    url="https://github.com/twyleg/simple_python_app",
     packages=find_packages(),
     long_description=read_long_description(),
     long_description_content_type="text/markdown",
     include_package_data=True,
     install_requires=["pyyaml~=6.0.2"],
-    entry_points={
-        "console_scripts": [
-            "template_project_python = template_project_python.main:main",
-        ]
-    },
+    entry_points={},
 )

@@ -1,3 +1,4 @@
+# Copyright (C) 2024 twyleg
 import logging
 import argparse
 import sys
@@ -5,8 +6,10 @@ from pathlib import Path
 from typing import Callable, Any, Dict, List
 
 import simple_python_app.config
+from simple_python_app import __version__
 from simple_python_app.logging import init_logging, init_default_logging
 from simple_python_app.config import init_config, search_config_filepath
+
 
 logm = logging.getLogger(__name__)
 
@@ -23,7 +26,8 @@ class GenericApplication:
     def __init__(self,
                  application_name: str,
                  version: str,
-                 logging_init_enabled=True,
+                 logging_init_default_logging_enabled=True,
+                 logging_init_custom_logging_enabled=True,
                  logging_config_filepath: None | Path = None,
                  logging_default_format: None | str = None,
                  logging_default_date_format: None | str = None,
@@ -34,7 +38,8 @@ class GenericApplication:
                  config_search_filenames: List[str] | None = None):
         self._application_name = application_name
         self._version = version
-        self._logging_init_enabled = logging_init_enabled
+        self._logging_init_default_logging_enabled = logging_init_default_logging_enabled
+        self._logging_init_custom_logging_enabled = logging_init_custom_logging_enabled
         self._logging_config_filepath = logging_config_filepath
         self._logging_default_format = logging_default_format
         self._logging_default_date_format = logging_default_date_format
@@ -123,26 +128,35 @@ class GenericApplication:
         if argv is None:
             argv = sys.argv
         self.__init_argparse(argv)
-        self.__init_default_logging()
+        if self._logging_init_default_logging_enabled:
+            self.__init_default_logging()
+
         logm.debug("Init argparse")
-        logm.debug("Init default logging")
+        if self._logging_init_default_logging_enabled:
+            logm.debug("Init default logging")
+        else:
+            logm.debug("Init default logging disabled!")
 
     def __init_stage_two(self) -> None:
-        if self._logging_init_enabled:
+        if self._logging_init_custom_logging_enabled:
             logm.debug("Init custom logging")
             self.__init_custom_logging()
+
+        logm.debug("simple_python_application framework started!")
+        logm.debug("Framework version: %s", __version__)
+
         if self._config_init_enabled:
             logm.debug("Init config")
             self.__init_config()
 
     def __init_stage_three(self) -> None:
-        if self._logging_init_enabled:
+        if self._logging_init_custom_logging_enabled:
             if self._logging_config_filepath:
-                logm.debug("Logging config filepath: %s", self._logging_config_filepath)
+                logm.debug("Init custom logging. Using config file: %s", self._logging_config_filepath)
             else:
-                logm.debug("No logging config provided or found, keeping default logging config!")
+                logm.debug("Init custom logging. No config provided or found, keeping default logging config!")
         else:
-            logm.debug("Logging init disabled! Keeping default logging config!")
+            logm.debug("Init custom logging disabled! Keeping default logging config!")
 
         if self._config_init_enabled:
             logm.debug("Config filepath: %s", self._config_filepath)
@@ -160,11 +174,16 @@ class GenericApplication:
 
     def start(self, argv: List[str] | None = None):
 
-        self.__init_stage_one(argv)
-        self.__init_stage_two()
-        self.__init_stage_three()
-
         try:
-            self.run(self._args)
-        except AttributeError:
-            logm.error("No \"run()\" method provided. Exiting!")
+            self.__init_stage_one(argv)
+            self.__init_stage_two()
+            self.__init_stage_three()
+
+            if hasattr(self, "run") and callable(self.run):
+                    ret = self.run(self._args)
+                    return ret if ret else 0
+            else:
+                logm.error("No \"run(args)\" method provided. Exiting!")
+        except Exception as e:
+            logm.exception(e)
+        return -1

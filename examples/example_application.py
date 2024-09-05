@@ -1,5 +1,6 @@
 import argparse
 import sys
+import time
 from pathlib import Path
 
 from simple_python_app.generic_application import GenericApplication
@@ -13,7 +14,7 @@ class SimpleExampleApplication(GenericApplication):
         super().__init__(
             application_name="simple_example_application",
             version="0.0.1",
-            config_schema_filepath=FILE_DIR / "simple_example_application_config_schema.json"
+            application_config_schema_filepath=FILE_DIR / "simple_example_application_config_schema.json"
         )
 
     def add_arguments(self, argparser: argparse.ArgumentParser):
@@ -27,7 +28,12 @@ class SimpleExampleApplication(GenericApplication):
     def run(self, args: argparse.Namespace):
         self.logm.info("run()")
         self.logm.debug("run()")
-        self.logm.info("%s", args)
+
+        i = 0
+        while True:
+            self.logm.info("%d", i)
+            i += 1
+            time.sleep(1.0)
 
 
 if __name__ == "__main__":

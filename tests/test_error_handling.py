@@ -11,7 +11,7 @@ import simple_python_app.config
 from simple_python_app.generic_application import GenericApplication
 from simple_python_app.config import ConfigFileNotFoundError, ConfigInvalidError, ConfigSchemaFileNotFoundError, ConfigSchemaInvalidError
 
-from fixtures import print_tmp_path, valid_logging_config, project_dir
+from fixtures import print_tmp_path, valid_custom_logging_config, project_dir
 
 #
 # General naming convention for unit tests:
@@ -32,7 +32,7 @@ class BaseTestApplication(GenericApplication):
             version="0.0.1",
             logging_init_default_logging_enabled=False, # Caution: This is necessary because otherwise log init will
             logging_init_custom_logging_enabled=False,  # remove pytest handler and caplog won't work.
-            config_init_enabled=False,
+            application_config_init_enabled=False,
             **kwargs
         )
 

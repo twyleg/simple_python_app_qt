@@ -8,7 +8,7 @@ import simple_python_app.logging
 import simple_python_app.config
 from simple_python_app.generic_application import GenericApplication
 
-from fixtures import valid_logging_config, project_dir, print_tmp_path, valid_application_config_in_cwd, invalid_application_config_in_cwd
+from fixtures import valid_custom_logging_config, project_dir, print_tmp_path, valid_application_config_in_cwd, invalid_application_config_in_cwd
 
 
 #
@@ -40,38 +40,38 @@ class BaseTestApplication(GenericApplication):
 class ConfigInitDisabledApplication(BaseTestApplication):
     def __init__(self):
         super().__init__(
-            config_init_enabled=False
+            application_config_init_enabled=False
         )
 
 class ExplicitConfigApplication(BaseTestApplication):
     def __init__(self):
         super().__init__(
-            config_init_enabled=True,
-            config_schema_filepath=FILE_DIR / "resources/application_configs/valid_test_application_config_schema.json",
-            config_filepath=Path.cwd() / "test_application_config.json",
+            application_config_init_enabled=True,
+            application_config_schema_filepath=FILE_DIR / "resources/application_configs/valid_test_application_config_schema.json",
+            application_config_filepath=Path.cwd() / "test_application_config.json",
         )
 
 class ExplicitConfigWithInvalidSchemaApplication(BaseTestApplication):
     def __init__(self):
         super().__init__(
-            config_init_enabled=True,
-            config_schema_filepath=FILE_DIR / "resources/application_configs/invalid_test_application_config_schema.json",
-            config_filepath=Path.cwd() / "test_application_config.json",
+            application_config_init_enabled=True,
+            application_config_schema_filepath=FILE_DIR / "resources/application_configs/invalid_test_application_config_schema.json",
+            application_config_filepath=Path.cwd() / "test_application_config.json",
         )
 
 class UnavailableConfigSchemaApplication(BaseTestApplication):
     def __init__(self):
         super().__init__(
-            config_init_enabled=True,
-            config_schema_filepath=FILE_DIR / "resources/application_configs/not_existing.json",
-            config_filepath=Path.cwd() / "test_application_config.json",
+            application_config_init_enabled=True,
+            application_config_schema_filepath=FILE_DIR / "resources/application_configs/not_existing.json",
+            application_config_filepath=Path.cwd() / "test_application_config.json",
         )
 
 class SearchConfigApplication(BaseTestApplication):
     def __init__(self):
         super().__init__(
-            config_init_enabled=True,
-            config_schema_filepath=FILE_DIR / "resources/application_configs/valid_test_application_config_schema.json"
+            application_config_init_enabled=True,
+            application_config_schema_filepath=FILE_DIR / "resources/application_configs/valid_test_application_config_schema.json"
         )
 
 class TestValidConfigProvided:
@@ -94,7 +94,7 @@ class TestValidConfigProvided:
         test_app = SearchConfigApplication()
         test_app.start([])
 
-        assert test_app._config_filepath == valid_application_config_in_cwd
+        assert test_app._application_config_filepath == valid_application_config_in_cwd
         self.assert_valid_config(test_app.config)
 
 

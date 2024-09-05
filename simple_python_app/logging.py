@@ -1,79 +1,39 @@
 # Copyright (C) 2024 twyleg
 from pathlib import Path
 
-import sys
 import logging
 import logging.config
 from typing import Any, Dict
 
 import yaml
 
-from simple_python_app.helper import find_file
 
-LOGGING_DEFAULT_CONFIG_FILENAMES = [
-    "logging.yaml",
-    "logging.yml",
-]
+def init_logging(config_filepath: Path, logfile_filepath: Path | None = None, force_log_level: None | int = None) -> None:
 
-LOGGING_DEFAULT_CONFIG_SEARCH_PATHS = [
-    Path.cwd(),
-    Path.home()
-]
+    with open(config_filepath, 'r') as f:
+        d = yaml.safe_load(f)
 
-LOGGING_DEFAULT_FORMAT = "[%(asctime)s.%(msecs)03d][%(levelname)s][%(name)s]: %(message)s"
-LOGGING_DEFAULT_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+        if force_log_level:
+            __set_log_level(d, force_log_level)
 
-logm = logging.getLogger(__name__)
+        if logfile_filepath:
+            __set_file_handler_filename(d, logfile_filepath)
 
+        logging.config.dictConfig(d)
 
-def init_default_logging(format: None | str = None, date_format: None | str = None, verbose=False) -> None:
-    if not format:
-        format = LOGGING_DEFAULT_FORMAT
-    if not date_format:
-        date_format = LOGGING_DEFAULT_DATE_FORMAT
-    level = logging.DEBUG if verbose else logging.INFO
-    logging.basicConfig(stream=sys.stdout, format=format, datefmt=date_format, level=level,
-                        force=True)
-    logm.debug("Initial default logging configured: Level=%s", logging.getLevelName(level))
-
-
-def __set_level_to_debug(config_dict: Dict[str, Any]) -> None:
+def __set_log_level(config_dict: Dict[str, Any], log_level: int) -> None:
+    level_name = logging.getLevelName(log_level)
     if "handlers" in config_dict:
         for handler in config_dict["handlers"].values():
-            handler["level"] = "DEBUG"
+            handler["level"] = level_name
     if "loggers" in config_dict:
         for logger in config_dict["loggers"].values():
-            logger["level"] = "DEBUG"
+            logger["level"] = level_name
     if "root" in  config_dict:
-        config_dict["root"]["level"] = "DEBUG"
+        config_dict["root"]["level"] = level_name
 
-
-def init_logging(config_filepath: Path = None, verbose=False) -> None:
-
-    if not config_filepath:
-        logm.debug("No explicit logging config location provided. Searching...")
-        config_filepath = find_file(LOGGING_DEFAULT_CONFIG_SEARCH_PATHS, LOGGING_DEFAULT_CONFIG_FILENAMES, logm)
-
-    if config_filepath:
-        try:
-            with open(config_filepath, 'r') as f:
-                d = yaml.safe_load(f)
-
-                if verbose:
-                    __set_level_to_debug(d)
-
-                logging.config.dictConfig(d)
-            logm.debug("Logging config loaded from file: %s", config_filepath)
-        except FileNotFoundError as e:
-            logm.error("Unable to find logging config (%s):", config_filepath)
-            logm.error(e)
-            logm.error("Exiting...")
-            sys.exit(-1)
-        except (ValueError, TypeError, AttributeError, ImportError) as e:
-            logm.error("Error reading logging config (%s):", config_filepath)
-            logm.error(e)
-            logm.error("Exiting...")
-            sys.exit(-1)
-    else:
-        logm.debug("No logging config file provided. Keeping default settings!")
-
+def __set_file_handler_filename(config_dict: Dict[str, Any], logfile_filepath: Path) -> None:
+    if "handlers" in config_dict:
+        for handler in config_dict["handlers"].values():
+            if "class" in handler and handler["class"] == "logging.FileHandler":
+                handler["filename"] = logfile_filepath

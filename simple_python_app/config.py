@@ -13,12 +13,7 @@ Config = Dict[str, Any]
 logm = logging.getLogger(__name__)
 
 
-def search_config_filepath(search_paths: List[Path], filenames: List[str]) -> Path | None:
-    return find_file(search_paths, filenames, logm)
-
 def init_config(config_filepath: Path, config_schema_filepath: Path | None = None) -> Config:
-
-    logm.debug("Reading config from file: %s", config_filepath)
 
     with open(config_filepath) as config_file:
         config = json.load(config_file)

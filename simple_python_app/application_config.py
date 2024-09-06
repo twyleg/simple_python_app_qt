@@ -7,13 +7,13 @@ from typing import Dict, Any, List
 
 from simple_python_app.helper import find_file
 
-Config = Dict[str, Any]
+ApplicationConfig = Dict[str, Any]
 
 
 logm = logging.getLogger(__name__)
 
 
-def init_config(config_filepath: Path, config_schema_filepath: Path | None = None) -> Config:
+def init_application_config(config_filepath: Path, config_schema_filepath: Path | None = None) -> ApplicationConfig:
 
     with open(config_filepath) as config_file:
         config = json.load(config_file)

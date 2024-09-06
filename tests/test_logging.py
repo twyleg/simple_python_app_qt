@@ -10,7 +10,7 @@ import pytest
 from pathlib import Path
 
 import simple_python_app.logging
-import simple_python_app.config
+import simple_python_app.application_config
 from simple_python_app.generic_application import GenericApplication
 
 from fixtures import valid_custom_logging_config, project_dir, print_tmp_path, valid_custom_logging_config_with_alternative_name_in_alternative_directory
@@ -36,19 +36,22 @@ def log_file_filename_format_is_correct(log_file_filepath: Path) -> bool:
     p = re.compile(r"^\d{14}_\S+?\.log$")
     return p.match(log_file_filepath.name) is not None
 
-def is_string_in_file(filepath: Path, string: str) -> bool:
+def log_file_contains_string(filepath: Path, string: str) -> bool:
     with open(filepath, 'r') as f:
-        return string in f.read()
+        p = re.compile(string)
+        file_content = f.read()
+        res = re.findall(p, file_content)
+        return len(res) != 0
 
 def log_file_contains_test_log_line_on_levels(log_file_filepath: Path, levels: List[int]) -> bool:
     for level in levels:
-        if not is_string_in_file(log_file_filepath, f"[{logging.getLevelName(level)}][test_application]: test log line"):
+        if not log_file_contains_string(log_file_filepath, f"\[{logging.getLevelName(level)}\]\[test_application\]: test log line"):
             return False
     return True
 
 def log_file_not_containing_log_lines_on_levels(log_file_filepath: Path, levels: List[int]) -> bool:
     for level in levels:
-        if is_string_in_file(log_file_filepath, logging.getLevelName(level)):
+        if log_file_contains_string(log_file_filepath, logging.getLevelName(level)):
             return False
     return True
 
@@ -104,7 +107,7 @@ class TestDefaultLogging:
         test_app = DefaultLoggingApplication()
         test_app.start([])
 
-        assert test_app.logging_type == GenericApplication.LoggingType.DEFAULT_LOGGING
+        assert test_app.logging_config_type == GenericApplication.LoggingConfigType.DEFAULT
         assert test_app.logging_config_filepath != valid_custom_logging_config
         assert log_file_exists(test_app.logging_logfile_filepath)
         assert log_file_filename_format_is_correct(test_app.logging_logfile_filepath)
@@ -115,7 +118,7 @@ class TestDefaultLogging:
         test_app = DefaultLoggingApplication()
         test_app.start(["-vv"])
 
-        assert test_app.logging_type == GenericApplication.LoggingType.DEFAULT_LOGGING
+        assert test_app.logging_config_type == GenericApplication.LoggingConfigType.DEFAULT
         assert test_app.logging_config_filepath != valid_custom_logging_config
         assert log_file_exists(test_app.logging_logfile_filepath)
         assert log_file_filename_format_is_correct(test_app.logging_logfile_filepath)
@@ -125,7 +128,7 @@ class TestDefaultLogging:
         test_app = DefaultVerboseLoggingApplication()
         test_app.start([])
 
-        assert test_app.logging_type == GenericApplication.LoggingType.DEFAULT_LOGGING
+        assert test_app.logging_config_type == GenericApplication.LoggingConfigType.DEFAULT
         assert test_app.logging_config_filepath != valid_custom_logging_config
         assert log_file_exists(test_app.logging_logfile_filepath)
         assert log_file_filename_format_is_correct(test_app.logging_logfile_filepath)
@@ -138,7 +141,7 @@ class TestCustomLogging:
         test_app = CustomLoggingWithExplicitConfigApplication()
         test_app.start([])
 
-        assert test_app.logging_type == GenericApplication.LoggingType.CUSTOM_LOGGING
+        assert test_app.logging_config_type == GenericApplication.LoggingConfigType.CUSTOM
         assert test_app.logging_config_filepath == valid_custom_logging_config
         assert log_file_exists(test_app.logging_logfile_filepath)
         assert log_file_filename_format_is_correct(test_app.logging_logfile_filepath)
@@ -150,7 +153,7 @@ class TestCustomLogging:
         test_app = CustomLoggingWithExplicitConfigApplication()
         test_app.start(["-vv"])
 
-        assert test_app.logging_type == GenericApplication.LoggingType.CUSTOM_LOGGING
+        assert test_app.logging_config_type == GenericApplication.LoggingConfigType.CUSTOM
         assert test_app.logging_config_filepath == valid_custom_logging_config
         assert log_file_exists(test_app.logging_logfile_filepath)
         assert log_file_filename_format_is_correct(test_app.logging_logfile_filepath)
@@ -161,7 +164,7 @@ class TestCustomLogging:
         test_app = CustomLoggingWithExplicitConfigApplication()
         test_app.start([])
 
-        assert test_app.logging_type == GenericApplication.LoggingType.CUSTOM_LOGGING
+        assert test_app.logging_config_type == GenericApplication.LoggingConfigType.CUSTOM
         assert test_app.logging_config_filepath == valid_custom_logging_config
         assert log_file_exists(test_app.logging_logfile_filepath)
         assert log_file_filename_format_is_correct(test_app.logging_logfile_filepath)
@@ -169,11 +172,12 @@ class TestCustomLogging:
         assert log_file_not_containing_log_lines_on_levels(test_app.logging_logfile_filepath, [DEBUG])
 
     def test_CustomLoggingWithExplicitConfigSearchDirectoriesAndFilenames_StartApplication_CustomLoggingConfigFoundAndLoaded(self, caplog, project_dir,
-                                                                                                        valid_custom_logging_config_with_alternative_name_in_alternative_directory):
+                                                                                                                             valid_custom_logging_config,
+                                                                                                                             valid_custom_logging_config_with_alternative_name_in_alternative_directory):
         test_app = CustomLoggingWithExplicitConfigSearchDirectoriesAndFilenamesApplication()
         test_app.start([])
 
-        assert test_app.logging_type == GenericApplication.LoggingType.CUSTOM_LOGGING
+        assert test_app.logging_config_type == GenericApplication.LoggingConfigType.CUSTOM
         assert test_app.logging_config_filepath == valid_custom_logging_config_with_alternative_name_in_alternative_directory
         assert log_file_exists(test_app.logging_logfile_filepath)
         assert log_file_filename_format_is_correct(test_app.logging_logfile_filepath)
@@ -181,3 +185,16 @@ class TestCustomLogging:
         assert log_file_not_containing_log_lines_on_levels(test_app.logging_logfile_filepath, [DEBUG])
 
 
+class TestVerboseSystemInformationLogging:
+
+    def test_DefaultVeroseLoggingApplication_StartApplication_VerboseSystemInformationLogged(self, caplog, project_dir,
+                                                                                                        valid_custom_logging_config):
+        test_app = DefaultVerboseLoggingApplication()
+        test_app.start([])
+
+        assert log_file_contains_string(test_app.logging_logfile_filepath,
+                                        r"\[DEBUG\]\[simple_python_app.generic_application\]: - simple_python_app framework version = ")
+        assert log_file_contains_string(test_app.logging_logfile_filepath,
+                                        r"\[DEBUG\]\[simple_python_app.generic_application\]: - python version = ")
+        assert log_file_contains_string(test_app.logging_logfile_filepath,
+                                        r"\[DEBUG\]\[simple_python_app.generic_application\]: - pid = ")

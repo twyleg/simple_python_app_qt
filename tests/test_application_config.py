@@ -5,7 +5,7 @@ import pytest
 from pathlib import Path
 
 import simple_python_app.logging
-import simple_python_app.config
+import simple_python_app.application_config
 from simple_python_app.generic_application import GenericApplication
 
 from fixtures import valid_custom_logging_config, project_dir, print_tmp_path, valid_application_config_in_cwd, invalid_application_config_in_cwd
@@ -87,15 +87,15 @@ class TestValidConfigProvided:
         test_app = ExplicitConfigApplication()
         test_app.start([])
 
-        self.assert_valid_config(test_app.config)
+        self.assert_valid_config(test_app.application_config)
 
     def test_SearchConfig_StartApplication_ConfigFoundAndLoaded(self, caplog, project_dir,
                                                                 valid_application_config_in_cwd):
         test_app = SearchConfigApplication()
         test_app.start([])
 
-        assert test_app._application_config_filepath == valid_application_config_in_cwd
-        self.assert_valid_config(test_app.config)
+        assert test_app.application_config_filepath == valid_application_config_in_cwd
+        self.assert_valid_config(test_app.application_config)
 
 
 class TestInvalidConfigProvided:
@@ -112,7 +112,7 @@ class TestNoConfigProvided:
         test_app = ConfigInitDisabledApplication()
         test_app.start([])
 
-        assert test_app.config is None
+        assert test_app.application_config is None
 
     def test_ExplicitConfigSpecified_StartApplication_ConfigFileNotFoundError(self, caplog, project_dir):
         test_app = ExplicitConfigApplication()

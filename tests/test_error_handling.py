@@ -7,9 +7,9 @@ import logging
 from pathlib import Path
 
 import simple_python_app.logging
-import simple_python_app.config
+import simple_python_app.application_config
 from simple_python_app.generic_application import GenericApplication
-from simple_python_app.config import ConfigFileNotFoundError, ConfigInvalidError, ConfigSchemaFileNotFoundError, ConfigSchemaInvalidError
+from simple_python_app.application_config import ConfigFileNotFoundError, ConfigInvalidError, ConfigSchemaFileNotFoundError, ConfigSchemaInvalidError
 
 from fixtures import print_tmp_path, valid_custom_logging_config, project_dir
 

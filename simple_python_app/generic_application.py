@@ -1,4 +1,5 @@
 # Copyright (C) 2024 twyleg
+import getpass
 import logging
 import argparse
 import os
@@ -375,7 +376,7 @@ class GenericApplication:
         logm.debug("- argv = %s", sys.argv)
         logm.debug("- pid = %d", os.getpid())
         if sys.platform != "win32":
-            logm.debug("- user = %s (uid=%d,gid=%d)", os.getlogin(), os.getuid(), os.getgid())
+            logm.debug("- user = %s (uid=%d,gid=%d)", getpass.getuser(), os.getuid(), os.getgid())
         else:
             logm.debug("- user = %s", os.getlogin())
         logm.debug("- cwd = %s", os.getcwd())

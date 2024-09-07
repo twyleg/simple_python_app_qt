@@ -3,9 +3,8 @@ import json
 import logging
 import jsonschema
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any
 
-from simple_python_app.helper import find_file
 
 ApplicationConfig = Dict[str, Any]
 
@@ -14,7 +13,6 @@ logm = logging.getLogger(__name__)
 
 
 def init_application_config(config_filepath: Path, config_schema_filepath: Path | None = None) -> ApplicationConfig:
-
     with open(config_filepath) as config_file:
         config = json.load(config_file)
 
@@ -24,5 +22,3 @@ def init_application_config(config_filepath: Path, config_schema_filepath: Path 
                 jsonschema.validate(instance=config, schema=config_schema)
 
         return config
-
-

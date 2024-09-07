@@ -1,5 +1,4 @@
 # Copyright (C) 2024 twyleg
-import logging
 from pathlib import Path
 from typing import List
 

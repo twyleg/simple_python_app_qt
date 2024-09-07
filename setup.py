@@ -12,20 +12,25 @@ def read_long_description() -> str:
     return read("README.md")
 
 
+# fmt: off
 setup(
     name="simple_python_app",
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     author="Torsten Wylegala",
     author_email="mail@twyleg.de",
-    description="",
+    description="Simple framework that provides preconfigured components that most applications need.",
     license="GPL 3.0",
-    keywords="",
+    keywords="framework boilerplate logging argparse config",
     url="https://github.com/twyleg/simple_python_app",
     packages=find_packages(),
     long_description=read_long_description(),
     long_description_content_type="text/markdown",
     include_package_data=True,
-    install_requires=["pyyaml~=6.0.2"],
+    install_requires=[
+        "pyyaml~=6.0.2",
+        "jsonschema~=4.20.0"
+    ],
     entry_points={},
 )
+# fmt: on

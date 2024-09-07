@@ -1,14 +1,17 @@
 # Copyright (C) 2024 twyleg
+# fmt: off
 import argparse
-import importlib
-import pytest
 from pathlib import Path
 
-import simple_python_app.logging
-import simple_python_app.application_config
 from simple_python_app.generic_application import GenericApplication
 
-from fixtures import valid_custom_logging_config, project_dir, print_tmp_path, valid_application_config_in_cwd, invalid_application_config_in_cwd
+from fixtures import (
+    valid_custom_logging_config,
+    project_dir,
+    print_tmp_path,
+    valid_application_config_in_cwd,
+    invalid_application_config_in_cwd,
+)
 
 
 #
@@ -20,17 +23,11 @@ from fixtures import valid_custom_logging_config, project_dir, print_tmp_path, v
 FILE_DIR = Path(__file__).parent
 
 
-def reload_imports():
-    importlib.reload(simple_python_app.logging)
-    importlib.reload(simple_python_app.config)
-
-
 class BaseTestApplication(GenericApplication):
     def __init__(self, **kwargs):
         super().__init__(
             application_name="test_application",
-            version="0.0.1",
-            **kwargs
+            version="0.0.1", **kwargs
         )
 
     def run(self, argparser: argparse.ArgumentParser):
@@ -43,6 +40,7 @@ class ConfigInitDisabledApplication(BaseTestApplication):
             application_config_init_enabled=False
         )
 
+
 class ExplicitConfigApplication(BaseTestApplication):
     def __init__(self):
         super().__init__(
@@ -50,6 +48,7 @@ class ExplicitConfigApplication(BaseTestApplication):
             application_config_schema_filepath=FILE_DIR / "resources/application_configs/valid_test_application_config_schema.json",
             application_config_filepath=Path.cwd() / "test_application_config.json",
         )
+
 
 class ExplicitConfigWithInvalidSchemaApplication(BaseTestApplication):
     def __init__(self):
@@ -59,6 +58,7 @@ class ExplicitConfigWithInvalidSchemaApplication(BaseTestApplication):
             application_config_filepath=Path.cwd() / "test_application_config.json",
         )
 
+
 class UnavailableConfigSchemaApplication(BaseTestApplication):
     def __init__(self):
         super().__init__(
@@ -67,30 +67,39 @@ class UnavailableConfigSchemaApplication(BaseTestApplication):
             application_config_filepath=Path.cwd() / "test_application_config.json",
         )
 
+
 class SearchConfigApplication(BaseTestApplication):
     def __init__(self):
         super().__init__(
             application_config_init_enabled=True,
-            application_config_schema_filepath=FILE_DIR / "resources/application_configs/valid_test_application_config_schema.json"
+            application_config_schema_filepath=FILE_DIR / "resources/application_configs/valid_test_application_config_schema.json",
         )
 
-class TestValidConfigProvided:
 
+class TestValidConfigProvided:
     def assert_valid_config(self, config):
         assert config is not None
         assert config["example_parameter_integer"] == 42
         assert config["example_parameter_string"] == "foo"
         assert config["example_parameter_float"] == 3.14
 
-    def test_ExplicitConfigSpecified_StartApplication_ExplicitConfigLoaded(self, caplog, project_dir,
-                                                                          valid_application_config_in_cwd):
+    def test_ExplicitConfigSpecified_StartApplication_ExplicitConfigLoaded(
+            self,
+            caplog,
+            project_dir,
+            valid_application_config_in_cwd
+    ):
         test_app = ExplicitConfigApplication()
         test_app.start([])
 
         self.assert_valid_config(test_app.application_config)
 
-    def test_SearchConfig_StartApplication_ConfigFoundAndLoaded(self, caplog, project_dir,
-                                                                valid_application_config_in_cwd):
+    def test_SearchConfig_StartApplication_ConfigFoundAndLoaded(
+            self,
+            caplog,
+            project_dir,
+            valid_application_config_in_cwd
+    ):
         test_app = SearchConfigApplication()
         test_app.start([])
 
@@ -99,37 +108,53 @@ class TestValidConfigProvided:
 
 
 class TestInvalidConfigProvided:
-
-    def test_ExplicitConfigSpecified_StartApplication_ConfigInvalidError(self, caplog, project_dir,
-                                                                          invalid_application_config_in_cwd):
+    def test_ExplicitConfigSpecified_StartApplication_ConfigInvalidError(
+            self,
+            caplog,
+            project_dir,
+            invalid_application_config_in_cwd
+    ):
         test_app = ExplicitConfigApplication()
         assert test_app.start([]) == -1
 
 
 class TestNoConfigProvided:
-
-    def test_ConfigInitDisabled_StartApplication_NoConfigLoadedAsExpected(self, caplog, project_dir):
+    def test_ConfigInitDisabled_StartApplication_NoConfigLoadedAsExpected(
+            self,
+            caplog,
+            project_dir
+    ):
         test_app = ConfigInitDisabledApplication()
         test_app.start([])
 
         assert test_app.application_config is None
 
-    def test_ExplicitConfigSpecified_StartApplication_ConfigFileNotFoundError(self, caplog, project_dir):
+    def test_ExplicitConfigSpecified_StartApplication_ConfigFileNotFoundError(
+            self,
+            caplog,
+            project_dir
+    ):
         test_app = ExplicitConfigApplication()
         assert test_app.start([]) == -1
 
 
 class TestNoConfigSchemaProvided:
-
-    def test_ExplicitConfigSpecified_StartApplication_ConfigSchemaFileNotFoundError(self, caplog, project_dir,
-                                                                                    valid_application_config_in_cwd):
+    def test_ExplicitConfigSpecified_StartApplication_ConfigSchemaFileNotFoundError(
+            self,
+            caplog,
+            project_dir,
+            valid_application_config_in_cwd
+    ):
         test_app = UnavailableConfigSchemaApplication()
         assert test_app.start([]) == -1
 
 
 class TestInvalidConfigSchemaProvided:
-
-    def test_ExplicitConfigSpecified_StartApplication_ConfigSchemaFileInvalidError(self, caplog, project_dir,
-                                                                                    valid_application_config_in_cwd):
+    def test_ExplicitConfigSpecified_StartApplication_ConfigSchemaFileInvalidError(
+            self,
+            caplog,
+            project_dir,
+            valid_application_config_in_cwd
+    ):
         test_app = ExplicitConfigWithInvalidSchemaApplication()
         assert test_app.start([]) == -1

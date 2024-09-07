@@ -14,16 +14,13 @@ class SimpleExampleApplication(GenericApplication):
         super().__init__(
             application_name="simple_example_application",
             version="0.0.1",
-            application_config_schema_filepath=FILE_DIR / "simple_example_application_config_schema.json"
+            application_config_schema_filepath=FILE_DIR / "simple_example_application_config_schema.json",
         )
 
     def add_arguments(self, argparser: argparse.ArgumentParser):
         self.logm.info("init_argparse()")
 
-        argparser.add_argument("--foo",
-            type=str,
-            default=None,
-            help="Example")
+        argparser.add_argument("--foo", type=str, default=None, help="Example")
 
     def run(self, args: argparse.Namespace):
         self.logm.info("run()")

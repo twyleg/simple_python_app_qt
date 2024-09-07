@@ -7,13 +7,12 @@
 
 # simple_python_app
 
-Ipsum Lorem
-
-## Prerequisites
-
-Add the following secrets for GitHub Actions:
-
-* PYPI_API_TOKEN
+This framework provides boilerplate code for common projects.
+Main features are the following preconfigured components:
+* argparsing
+* logging
+* error handling
+* application config loading
 
 ## Examples
 

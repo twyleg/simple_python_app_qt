@@ -8,14 +8,14 @@ from collections import namedtuple
 from importlib import metadata
 from datetime import datetime
 from pathlib import Path
-from enum import StrEnum
+from enum import Enum
 from typing import Callable, Any, Dict, List, Tuple
 
 import simple_python_app.application_config
 from simple_python_app import __version__
 from simple_python_app.helper import find_file
 from simple_python_app.logging import init_logging
-from simple_python_app.application_config import init_application_config
+from simple_python_app.application_config import init_application_config, ApplicationConfig
 
 
 logm = logging.getLogger(__name__)
@@ -24,21 +24,23 @@ FILE_DIR = Path(__file__).parent
 
 
 class GenericApplication:
-
     ApplicationConfig = simple_python_app.application_config.ApplicationConfig
 
-    class LoggingConfigType(StrEnum):
-        DEFAULT = "DEFAULT"
-        CUSTOM = "CUSTOM"
+    class LoggingConfigType(Enum):
+        DEFAULT = 1
+        CUSTOM = 2
 
-    class ConfigFilepathSource(StrEnum):
-        CLI_ARG = "CLI_ARG"
-        EXPLICIT = "EXPLICIT"
-        SEARCH = "SEARCH"
+    class ConfigFilepathSource(Enum):
+        CLI_ARG = 1
+        EXPLICIT = 2
+        SEARCH = 3
 
-    Config = namedtuple("Config", [
+    Config = namedtuple(
+        "Config",
+        [
             "logging_force_log_level",
             "logging_init_custom_logging_enabled",
+            "logging_init_default_logging_enabled",
             "logging_config_filepath",
             "logging_config_search_paths",
             "logging_config_search_filenames",
@@ -50,43 +52,46 @@ class GenericApplication:
             "application_config_schema_filepath",
             "application_config_filepath",
             "application_config_search_paths",
-            "application_config_search_filenames"
-        ]
+            "application_config_search_filenames",
+        ],
     )
 
-    def __init__(self,
-                 application_name: str,
-                 version: str,
-                 logging_force_log_level: None | int = None,
-                 logging_init_custom_logging_enabled=True,
-                 logging_config_filepath: None | Path = None,
-                 logging_config_search_paths: None | List[Path] = None,
-                 logging_config_search_filenames: None | List[str] = None,
-                 logging_default_format: None | str = None,
-                 logging_default_date_format: None | str = None,
-                 logging_logfile_output_dir: None | Path = None,
-                 logging_logfile_filename: None | str = None,
-                 application_config_init_enabled=True,
-                 application_config_schema_filepath: None | Path = None,
-                 application_config_filepath: Path | None = None,
-                 application_config_search_paths: List[Path] | None = None,
-                 application_config_search_filenames: List[str] | None = None):
-
+    def __init__(
+        self,
+        application_name: str,
+        version: str,
+        logging_force_log_level: None | int = None,
+        logging_init_custom_logging_enabled=True,
+        logging_init_default_logging_enabled=True,
+        logging_config_filepath: None | Path = None,
+        logging_config_search_paths: None | List[Path] = None,
+        logging_config_search_filenames: None | List[str] = None,
+        logging_default_format: None | str = None,
+        logging_default_date_format: None | str = None,
+        logging_logfile_output_dir: None | Path = None,
+        logging_logfile_filename: None | str = None,
+        application_config_init_enabled=True,
+        application_config_schema_filepath: None | Path = None,
+        application_config_filepath: Path | None = None,
+        application_config_search_paths: List[Path] | None = None,
+        application_config_search_filenames: List[str] | None = None,
+    ):
         self.config = GenericApplication.Config(
-            logging_force_log_level = logging_force_log_level,
-            logging_init_custom_logging_enabled = logging_init_custom_logging_enabled,
-            logging_config_filepath = logging_config_filepath,
-            logging_config_search_paths = logging_config_search_paths,
-            logging_config_search_filenames = logging_config_search_filenames,
-            logging_default_format = logging_default_format,
-            logging_default_date_format = logging_default_date_format,
-            logging_logfile_output_dir = logging_logfile_output_dir,
-            logging_logfile_filename = logging_logfile_filename,
-            application_config_init_enabled = application_config_init_enabled,
-            application_config_schema_filepath = application_config_schema_filepath,
-            application_config_filepath = application_config_filepath,
-            application_config_search_paths = application_config_search_paths,
-            application_config_search_filenames = application_config_search_filenames
+            logging_force_log_level=logging_force_log_level,
+            logging_init_custom_logging_enabled=logging_init_custom_logging_enabled,
+            logging_init_default_logging_enabled=logging_init_default_logging_enabled,
+            logging_config_filepath=logging_config_filepath,
+            logging_config_search_paths=logging_config_search_paths,
+            logging_config_search_filenames=logging_config_search_filenames,
+            logging_default_format=logging_default_format,
+            logging_default_date_format=logging_default_date_format,
+            logging_logfile_output_dir=logging_logfile_output_dir,
+            logging_logfile_filename=logging_logfile_filename,
+            application_config_init_enabled=application_config_init_enabled,
+            application_config_schema_filepath=application_config_schema_filepath,
+            application_config_filepath=application_config_filepath,
+            application_config_search_paths=application_config_search_paths,
+            application_config_search_filenames=application_config_search_filenames,
         )
 
         self._arg_parser = argparse.ArgumentParser(usage=f"{application_name} [<args>] <command>")
@@ -102,26 +107,33 @@ class GenericApplication:
         self.application_config_schema_filepath: None | Path = None
         self.application_config_filepath_source: None | GenericApplication.ConfigFilepathSource = None
         self.application_config_filepath: None | Path = None
-        self.application_config_search_paths = self.config.application_config_search_paths if (
-            self.config.application_config_search_paths) else self.__get_application_config_default_search_paths()
-        self.application_config_search_filenames = self.config.application_config_search_filenames if (
-            self.config.application_config_search_filenames) else self.__get_application_config_default_search_filenames()
-        self.application_config: None | Dict[str, Any] = None
+        self.application_config_search_paths = (
+            self.config.application_config_search_paths
+            if (self.config.application_config_search_paths)
+            else self.__get_application_config_default_search_paths()
+        )
+        self.application_config_search_filenames = (
+            self.config.application_config_search_filenames
+            if (self.config.application_config_search_filenames)
+            else self.__get_application_config_default_search_filenames()
+        )
+        self.application_config: None | ApplicationConfig = None
 
         self.logging_logfile_filepath: None | Path = None
         self.logging_config_type: None | GenericApplication.LoggingConfigType = None
         self.logging_config_filepath_source: None | GenericApplication.ConfigFilepathSource = None
         self.logging_config_filepath: None | Path = None
-        self.logging_config_search_paths = self.config.logging_config_search_paths if (
-            self.config.logging_config_search_paths) else self.__get_logging_config_default_search_paths()
-        self.logging_config_search_filenames = self.config.logging_config_search_filenames if (
-            self.config.logging_config_search_filenames) else self.__get_logging_config_default_search_filenames()
+        self.logging_config_search_paths = (
+            self.config.logging_config_search_paths if (self.config.logging_config_search_paths) else self.__get_logging_config_default_search_paths()
+        )
+        self.logging_config_search_filenames = (
+            self.config.logging_config_search_filenames
+            if (self.config.logging_config_search_filenames)
+            else self.__get_logging_config_default_search_filenames()
+        )
 
     def __get_application_config_default_search_paths(self) -> List[Path]:
-        return [
-            Path.cwd(),
-            Path.home()
-        ]
+        return [Path.cwd(), Path.home()]
 
     def __get_application_config_default_search_filenames(self) -> List[str]:
         return [
@@ -130,10 +142,7 @@ class GenericApplication:
         ]
 
     def __get_logging_config_default_search_paths(self) -> List[Path]:
-        return [
-            Path.cwd(),
-            Path.home()
-        ]
+        return [Path.cwd(), Path.home()]
 
     def __get_logging_config_default_search_filenames(self) -> List[str]:
         return [
@@ -149,7 +158,7 @@ class GenericApplication:
         sys.exit(exit_code)
 
     def __init_argparse(self, argv: List[str]) -> None:
-
+        # fmt: off
         self._arg_parser.add_argument(
             "-v",
             "--version",
@@ -162,7 +171,7 @@ class GenericApplication:
             "-vv",
             "--verbose",
             help="Run with verbose logging (debug level).",
-            action='store_true',
+            action="store_true",
         )
 
         self._arg_parser.add_argument(
@@ -186,20 +195,21 @@ class GenericApplication:
             type=str,
             default=None
         )
+        # fmt: on
 
         try:
             if self._add_arguments_method_available:
-                self.add_arguments(self._arg_parser)
+                self.add_arguments(self._arg_parser)  # type: ignore[attr-defined]
 
             self._args = self._arg_parser.parse_args(argv)
         except BaseException as e:
             self.__init_default_logging()
-            logm.error("Error when running user \"add_arguments()\" method:", self.config.logging_config_filepath)
+            logm.error('Error when running user "add_arguments()" method:', self.config.logging_config_filepath)
             logm.error(e)
             self.__exit(error=True)
 
     def __get_log_level(self) -> int | None:
-        if self._args.verbose:
+        if self._args.verbose:  # type: ignore[union-attr]
             return logging.DEBUG
         elif self.config.logging_force_log_level:
             return self.config.logging_force_log_level
@@ -214,8 +224,8 @@ class GenericApplication:
                 return "{:%Y%m%d%H%M%S}_{}.log".format(datetime.now(), self.application_name)
 
         def get_logfile_output_dir() -> Path:
-            if self._args.logging_dir:
-                return Path(self._args.logging_dir)
+            if self._args.logging_dir:  # type: ignore[union-attr]
+                return Path(self._args.logging_dir)  # type: ignore[union-attr]
             elif self.config.logging_logfile_output_dir:
                 return self.config.logging_logfile_output_dir
             else:
@@ -229,18 +239,20 @@ class GenericApplication:
         return logfile_output_dir / logfile_filename
 
     def __init_custom_logging(self) -> None:
-
         def find_logging_config_filepath() -> Tuple[Path | None, GenericApplication.ConfigFilepathSource]:
-            if self._args.logging_config:
-                return self._args.logging_config, GenericApplication.ConfigFilepathSource.CLI_ARG
+            if self._args.logging_config:  # type: ignore[union-attr]
+                return self._args.logging_config, GenericApplication.ConfigFilepathSource.CLI_ARG  # type: ignore[union-attr]
             elif self.config.logging_config_filepath:
                 return self.config.logging_config_filepath, GenericApplication.ConfigFilepathSource.EXPLICIT
             else:
-                return find_file(self.logging_config_search_paths, self.logging_config_search_filenames), GenericApplication.ConfigFilepathSource.SEARCH
+                return (
+                    find_file(self.logging_config_search_paths, self.logging_config_search_filenames),
+                    GenericApplication.ConfigFilepathSource.SEARCH,
+                )
 
         forced_log_level = self.__get_log_level()
         logfile_filepath = self.__get_logfile_filepath()
-        logging_custom_config_filepath, logging_custom_config_source = find_logging_config_filepath()
+        logging_custom_config_filepath, logging_custom_config_filepath_source = find_logging_config_filepath()
 
         if logging_custom_config_filepath:
             try:
@@ -248,7 +260,7 @@ class GenericApplication:
                 self.logging_config_type = GenericApplication.LoggingConfigType.CUSTOM
                 self.logging_logfile_filepath = logfile_filepath
                 self.logging_config_filepath = logging_custom_config_filepath
-                self.logging_config_filepath_source = logging_custom_config_filepath
+                self.logging_config_filepath_source = logging_custom_config_filepath_source
             except (ValueError, TypeError, AttributeError, ImportError) as e:
                 self.__init_default_logging()
                 logm.error("Error reading logging config (%s):", self.config.logging_config_filepath)
@@ -268,26 +280,35 @@ class GenericApplication:
         self.logging_config_filepath = default_logging_config_filepath
 
     def __init_application_config(self) -> None:
-
         def find_application_config_filepath() -> Tuple[Path | None, GenericApplication.ConfigFilepathSource]:
-            if self._args.config:
-                return self._args.config, GenericApplication.ConfigFilepathSource.CLI_ARG
+            if self._args.config:  # type: ignore[union-attr]
+                return self._args.config, GenericApplication.ConfigFilepathSource.CLI_ARG  # type: ignore[union-attr]
             elif self.config.application_config_filepath:
                 return self.config.application_config_filepath, GenericApplication.ConfigFilepathSource.EXPLICIT
             else:
-                return find_file(self.application_config_search_paths, self.application_config_search_filenames), GenericApplication.ConfigFilepathSource.SEARCH
+                return (
+                    find_file(self.application_config_search_paths, self.application_config_search_filenames),
+                    GenericApplication.ConfigFilepathSource.SEARCH,
+                )
 
         self.application_config_filepath, self.application_config_filepath_source = find_application_config_filepath()
-        try:
-            self.application_config = init_application_config(self.application_config_filepath, self.config.application_config_schema_filepath)
-        except BaseException as e:
-            logm.error("Error reading application config (%s):", self.application_config_filepath)
-            logm.error("Application config filepath source (%s):", self.application_config_filepath_source)
-            logm.error(e)
+
+        if self.application_config_filepath:
+            try:
+                self.application_config = init_application_config(self.application_config_filepath, self.config.application_config_schema_filepath)
+            except BaseException as e:
+                logm.error("Error reading application config (%s):", self.application_config_filepath)
+                logm.error("Application config filepath source (%s):", self.application_config_filepath_source)
+                logm.error(e)
+                self.__exit(error=True)
+        else:
+            logm.error("Unable to find application config in the following directories with the following filenames:")
+            logm.error("Directories: %s", self.application_config_search_paths)
+            logm.error("Filenames: %s", self.application_config_search_filenames)
             self.__exit(error=True)
 
     def __init_stage_one(self, argv: List[str] | None) -> None:
-        """"
+        """
         Init Stage One:
 
             First init stage doesn't depend on any user input, configs or anything else that needs be loaded
@@ -302,7 +323,7 @@ class GenericApplication:
         self.__init_argparse(argv)
 
     def __init_stage_two(self) -> None:
-        """"
+        """
         Init Stage Two:
 
             Second init stage takes runtime configs etc. into account
@@ -315,18 +336,17 @@ class GenericApplication:
 
         if self.config.logging_init_custom_logging_enabled:
             self.__init_custom_logging()
-        else:
+        elif self.config.logging_init_default_logging_enabled:
             self.__init_default_logging()
 
         if self.config.application_config_init_enabled:
             self.__init_application_config()
 
     def __init_stage_three(self) -> None:
-        """"
+        """
         Init Stage Three:
 
-            Third init stage prints information and loads the application config. From this point on, log lines are
-            provided.
+            Third init stage prints information. From this point on, log lines are provided.
         """
         logm.debug("********************************************")
         logm.debug("simple_python_application framework started!")
@@ -348,7 +368,7 @@ class GenericApplication:
         logm.debug("  ]")
         logm.debug("- modules = [")
         for dist in metadata.distributions():
-            logm.debug("    %s==%s",dist.name, dist.version)
+            logm.debug("    %s==%s", dist.name, dist.version)
         logm.debug("  ]")
 
         logm.debug("process information:")
@@ -366,7 +386,7 @@ class GenericApplication:
         for k, v in self.config._asdict().items():
             logm.debug("    %s = %s", k, v)
         logm.debug("  ]")
-        logm.debug("- user \"add_arguments()\" method available = %s", self._add_arguments_method_available)
+        logm.debug('- user "add_arguments()" method available = %s', self._add_arguments_method_available)
 
         logm.debug("logging config:")
         logm.debug("- logfile = %s", self.logging_logfile_filepath)
@@ -378,7 +398,10 @@ class GenericApplication:
             logm.debug("    %s", logging_config_search_path)
         logm.debug("  ]")
         logm.debug("- logging config search filenames = %s", self.logging_config_search_filenames)
-        logm.debug("- forced log level = %s", logging.getLevelName(self.config.logging_force_log_level) if self.config.logging_force_log_level else None)
+        logm.debug(
+            "- forced log level = %s",
+            logging.getLevelName(self.config.logging_force_log_level) if self.config.logging_force_log_level else None,
+        )
 
         logm.debug("application config:")
         logm.debug("- application config filepath = %s", self.application_config_filepath)
@@ -393,9 +416,7 @@ class GenericApplication:
         logm.debug("Configuration done! Passing control to user code!")
         logm.debug("============================================")
 
-
     def start(self, argv: List[str] | None = None) -> int:
-
         try:
             self.__init_stage_one(argv)
             self.__init_stage_two()
@@ -403,12 +424,14 @@ class GenericApplication:
 
             if self._run_method_available:
                 self.logm.info("%s (version=%s) started!", self.application_name, self.version)
-                ret = self.run(self._args)
+                ret = self.run(self._args)  # type: ignore[attr-defined]
                 return ret if ret else 0
             else:
-                logm.error("No \"run(args)\" method provided. Exiting!")
+                logm.error('No "run(args)" method provided. Exiting!')
         except SystemExit as e:
-            return e.code
+            ret = e.code
+            if ret is int:
+                return ret
         except BaseException as e:
             logm.exception(e)
         return -1

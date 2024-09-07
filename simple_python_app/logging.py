@@ -9,8 +9,7 @@ import yaml
 
 
 def init_logging(config_filepath: Path, logfile_filepath: Path | None = None, force_log_level: None | int = None) -> None:
-
-    with open(config_filepath, 'r') as f:
+    with open(config_filepath, "r") as f:
         d = yaml.safe_load(f)
 
         if force_log_level:
@@ -21,6 +20,7 @@ def init_logging(config_filepath: Path, logfile_filepath: Path | None = None, fo
 
         logging.config.dictConfig(d)
 
+
 def __set_log_level(config_dict: Dict[str, Any], log_level: int) -> None:
     level_name = logging.getLevelName(log_level)
     if "handlers" in config_dict:
@@ -29,8 +29,9 @@ def __set_log_level(config_dict: Dict[str, Any], log_level: int) -> None:
     if "loggers" in config_dict:
         for logger in config_dict["loggers"].values():
             logger["level"] = level_name
-    if "root" in  config_dict:
+    if "root" in config_dict:
         config_dict["root"]["level"] = level_name
+
 
 def __set_file_handler_filename(config_dict: Dict[str, Any], logfile_filepath: Path) -> None:
     if "handlers" in config_dict:

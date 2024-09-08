@@ -18,7 +18,7 @@ permissions:
 jobs:
   unittests:
     uses: ./.github/workflows/tests.yaml
-  deploy-pypi:
+  publish-pypi:
     needs: unittests
     runs-on: ubuntu-latest
     steps:

@@ -16,9 +16,10 @@ permissions:
   contents: read
 
 jobs:
-  tests:
+  unittests:
     uses: ./.github/workflows/tests.yaml
-  deploy:
+  deploy-pypi:
+    needs: unittests
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4

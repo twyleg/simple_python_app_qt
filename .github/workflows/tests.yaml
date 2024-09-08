@@ -1,6 +1,11 @@
 name: tests
 run-name: tests
-on: [push]
+on:
+  workflow_call:
+
+  push:
+    branches:
+      - "*"
 jobs:
   run-unittests:
     strategy:

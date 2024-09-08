@@ -6,6 +6,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest ]
+        python_version: [3.10, 3.11, 3.12]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -13,6 +14,6 @@ jobs:
           submodules: true
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '${{ matrix.python_version }}'
       - run: pip install -r requirements.txt
       - run: tox

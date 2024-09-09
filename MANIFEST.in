@@ -4,5 +4,6 @@ include requirements.txt
 graft simple_python_app
 recursive-exclude * *.py[co]
 include versioneer.py
+include simple_python_app/py.typed
 include simple_python_app/_version.py
 include simple_python_app/resources/*.txt

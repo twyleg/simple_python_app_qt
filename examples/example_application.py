@@ -35,4 +35,4 @@ class SimpleExampleApplication(GenericApplication):
 
 if __name__ == "__main__":
     simple_example_application = SimpleExampleApplication()
-    simple_example_application.start(sys.argv[1:])
+    simple_example_application.start()

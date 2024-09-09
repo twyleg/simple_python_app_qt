@@ -154,11 +154,14 @@ class GenericApplication:
         ]
 
     def __exit(self, error=False) -> None:
-        exit_code = -1 if error else 0
-        logm.error("Exiting! (exit_code=%d)", exit_code)
-        sys.exit(exit_code)
+        if error:
+            logm.error("Exiting! (exit_code=-1)")
+            sys.exit(-1)
+        else:
+            logm.debug("Exiting! (exit_code=0)")
+            sys.exit(0)
 
-    def __init_argparse(self, argv: List[str]) -> None:
+    def __init_argparse(self, argv: List[str] | None) -> None:
         # fmt: off
         self._arg_parser.add_argument(
             "-v",
@@ -172,7 +175,7 @@ class GenericApplication:
             "-vv",
             "--verbose",
             help="Run with verbose logging (debug level).",
-            action="store_true",
+            action="store_true"
         )
 
         self._arg_parser.add_argument(
@@ -203,6 +206,8 @@ class GenericApplication:
                 self.add_arguments(self._arg_parser)  # type: ignore[attr-defined]
 
             self._args = self._arg_parser.parse_args(argv)
+        except SystemExit as e:
+            self.__exit(error=False)
         except BaseException as e:
             self.__init_default_logging()
             logm.error('Error when running user "add_arguments()" method:', self.config.logging_config_filepath)
@@ -319,8 +324,6 @@ class GenericApplication:
             - argparse
         """
 
-        if argv is None:
-            argv = sys.argv
         self.__init_argparse(argv)
 
     def __init_stage_two(self) -> None:

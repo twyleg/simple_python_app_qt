@@ -1,0 +1,59 @@
+# Copyright (C) 2024 twyleg
+import argparse
+import logging
+from pathlib import Path
+
+from PySide6.QtCore import QObject, QTimer
+
+from simple_python_app_qt.property import PropertyMeta, Property
+from simple_python_app_qt.qml_application import QmlApplication
+
+
+FILE_DIR = Path(__name__).parent
+
+
+class ExampleModel(QObject, metaclass=PropertyMeta):
+    headline = Property(str)
+    counter = Property(int)
+
+    def __init__(self, headline: str, parent: QObject | None = None):
+        QObject.__init__(self, parent)
+        self.headline = headline
+        self.counter = 0
+
+
+class SimpleQmlExampleApplication(QmlApplication):
+    def __init__(self):
+        super().__init__(
+            application_name="simple_qml_example_application",
+            version="0.0.1",
+            application_config_schema_filepath=FILE_DIR / "simple_qml_example_application_config_schema.json",
+            logging_logfile_output_dir=FILE_DIR / "log/",
+            frontend_qml_file_path=FILE_DIR / "frontend.qml"
+        )
+
+        self.example_model = ExampleModel(self.application_name)
+
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.timer_callback)
+
+        self.add_model(self.example_model, "example_model")
+
+    def timer_callback(self) -> None:
+        self.example_model.counter += 1
+        self.logm.info("Counter: %s", self.example_model.counter)
+
+    def add_arguments(self, argparser: argparse.ArgumentParser):
+        argparser.add_argument("--name", type=str, default=None, help="Application name")
+        argparser.add_argument("--delay", type=int, default=1000, help="Application name")
+
+    def run(self, args: argparse.Namespace) -> int:
+        if args.name:
+            self.example_model.headline = args.name
+        self.timer.start(args.delay)
+        return self.open()
+
+
+if __name__ == "__main__":
+    simple_qml_example_application = SimpleQmlExampleApplication()
+    simple_qml_example_application.start()

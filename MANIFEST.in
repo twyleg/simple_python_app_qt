@@ -1,9 +1,9 @@
 include README.md
 include LICENSE
 include requirements.txt
-graft simple_python_app
+graft simple_python_app_qt
 recursive-exclude * *.py[co]
 include versioneer.py
-include simple_python_app/py.typed
-include simple_python_app/_version.py
-include simple_python_app/resources/*.txt
+include simple_python_app_qt/py.typed
+include simple_python_app_qt/_version.py
+include simple_python_app_qt/resources/*

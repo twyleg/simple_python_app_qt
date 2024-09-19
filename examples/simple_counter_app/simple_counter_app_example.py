@@ -25,11 +25,12 @@ class ExampleModel(QObject, metaclass=PropertyMeta):
 class SimpleQmlExampleApplication(QmlApplication):
     def __init__(self):
         super().__init__(
-            application_name="simple_qml_example_application",
+            application_name="simple_counter_app_example",
             version="0.0.1",
-            application_config_schema_filepath=FILE_DIR / "simple_qml_example_application_config_schema.json",
+            application_config_schema_filepath=FILE_DIR / "resources/config/simple_qml_example_application_config_schema.json",
+            application_config_filepath=FILE_DIR / "resources/config/simple_qml_example_application_config.json",
             logging_logfile_output_dir=FILE_DIR / "log/",
-            frontend_qml_file_path=FILE_DIR / "frontend.qml"
+            frontend_qml_file_path=FILE_DIR / "resources/frontend/frontend.qml",
         )
 
         self.example_model = ExampleModel(self.application_name)

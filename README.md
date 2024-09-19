@@ -8,6 +8,9 @@
 
 A small framework to simplify Python Qt applications. Based on [simple_python_app](https://github.com/twyleg/simple_python_app).
 
+## Dev dependencies
+
+* xvfb (to run Qt unit tests headless)
 
 ## Examples
 

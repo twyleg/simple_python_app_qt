@@ -79,23 +79,28 @@ class UiLogHandler(logging.Handler):
 
 
 class QmlApplication(GenericApplication):
-    def __init__(
-        self,
-        application_name: str,
-        version: str,
-        frontend_qml_file_path: Path,
-        **kwargs
-    ):
+    # fmt: off
+    def __init__(self,
+                 application_name: str,
+                 version: str,
+                 frontend_qml_file_path: Path,
+                 **kwargs
+                 ):
         super().__init__(
             application_name=application_name,
             version=version,
             logging_default_config_filepath=FILE_DIR / "resources/default_logging_config.yaml",
             **kwargs
         )
+    # fmt: on
 
         self.frontend_qml_file_path = frontend_qml_file_path
 
-        self.app = QGuiApplication(sys.argv)
+        if not QGuiApplication.instance():
+            self.app = QGuiApplication(sys.argv)
+        else:
+            self.app = QGuiApplication.instance()
+
         self.engine = QQmlApplicationEngine()
 
         QtCore.qInstallMessageHandler(self.qt_message_handler)
@@ -107,7 +112,7 @@ class QmlApplication(GenericApplication):
     def find_dev_log_handler():
         for handler in logging.getLogger().handlers:
             if handler.get_name() == "ui":
-                assert (isinstance(handler, UiLogHandler))
+                assert isinstance(handler, UiLogHandler)
                 return handler.log_model
 
     @staticmethod

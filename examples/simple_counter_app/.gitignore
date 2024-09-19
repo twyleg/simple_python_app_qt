@@ -1,4 +1,4 @@
 **/venv/
 **/output/
-log/
+simple_counter_app/log/
 *.log

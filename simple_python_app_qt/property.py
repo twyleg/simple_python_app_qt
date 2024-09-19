@@ -13,11 +13,11 @@ class PropertyMeta(type(QObject)):
             if not isinstance(attr, Property):
                 continue
 
-            types = {list: 'QVariantList', dict: 'QVariantMap'}
+            types = {list: "QVariantList", dict: "QVariantMap"}
             type_ = types.get(attr.type_, attr.type_)
 
             notifier = Signal(type_)
-            attrs[f'_{key}_changed'] = notifier
+            attrs[f"_{key}_changed"] = notifier
             attrs[key] = PropertyImpl(type_=type_, name=key, notify=notifier)
 
         return super().__new__(cls, name, bases, attrs)
@@ -42,15 +42,15 @@ class PropertyImpl(PySide6.QtCore.Property):
         self.name = name
 
     def getter(self, instance):
-        return getattr(instance, f'_{self.name}')
+        return getattr(instance, f"_{self.name}")
 
     def setter(self, instance, value):
-        signal = getattr(instance, f'_{self.name}_changed')
+        signal = getattr(instance, f"_{self.name}_changed")
 
         if type(value) in {list, dict}:
             value = make_notified(value, signal)
 
-        setattr(instance, f'_{self.name}', value)
+        setattr(instance, f"_{self.name}", value)
         signal.emit(value)
 
 
@@ -59,19 +59,17 @@ class MakeNotified:
 
     Creates the modified classes just once, on initialization.
     """
+
     change_methods = {
-        list: ['__delitem__', '__iadd__', '__imul__', '__setitem__', 'append',
-               'clear', 'extend', 'insert', 'pop', 'remove', 'reverse', 'sort'],
-        dict: ['__delitem__', '__ior__', '__setitem__', 'clear', 'pop',
-               'popitem', 'setdefault', 'update']
+        list: ["__delitem__", "__iadd__", "__imul__", "__setitem__", "append", "clear", "extend", "insert", "pop", "remove", "reverse", "sort"],
+        dict: ["__delitem__", "__ior__", "__setitem__", "clear", "pop", "popitem", "setdefault", "update"],
     }
 
     def __init__(self):
-        if not hasattr(dict, '__ior__'):
+        if not hasattr(dict, "__ior__"):
             # Dictionaries don't have | operator in Python < 3.9.
-            self.change_methods[dict].remove('__ior__')
-        self.notified_class = {type_: self.make_notified_class(type_)
-                               for type_ in [list, dict]}
+            self.change_methods[dict].remove("__ior__")
+        self.notified_class = {type_: self.make_notified_class(type_) for type_ in [list, dict]}
 
     def __call__(self, seq, signal):
         """Returns a notifying version of the supplied list or dict."""
@@ -82,7 +80,7 @@ class MakeNotified:
 
     @classmethod
     def make_notified_class(cls, parent):
-        notified_class = type(f'notified_{parent.__name__}', (parent,), {})
+        notified_class = type(f"notified_{parent.__name__}", (parent,), {})
         for method_name in cls.change_methods[parent]:
             original = getattr(notified_class, method_name)
             notified_method = cls.make_notified_method(original, parent)

@@ -26,6 +26,7 @@ class BaseQmlTestApplication(QmlApplication):
             application_name="test_qml_application",
             version="0.0.1",
             application_config_init_enabled=False,
+            argv=["-platform", "offscreen"],
             **kwargs
         )
 
@@ -62,7 +63,7 @@ class TestQmlApplication:
             project_dir
     ):
         test_app = ValidFrontendApplication()
-        test_app.start([])
+        assert test_app.start() == 0
 
     def test_QmlApplicationWithInvalidFrontend_StartApplication_ErrorThrownAndExit(
             self,
@@ -70,7 +71,7 @@ class TestQmlApplication:
             project_dir
     ):
         test_app = InvalidFrontendApplication()
-        assert test_app.start([]) == -1
+        assert test_app.start() == -1
 
     def test_QmlApplicationWithNonExistingFrontend_StartApplication_ErrorThrownAndExit(
             self,
@@ -78,4 +79,4 @@ class TestQmlApplication:
             project_dir
     ):
         test_app = NonExistingFrontendApplication()
-        assert test_app.start([]) == -1
+        assert test_app.start() == -1

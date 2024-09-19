@@ -1,6 +1,7 @@
 # Copyright (C) 2024 twyleg
 import argparse
 import logging
+import sys
 from pathlib import Path
 
 from PySide6.QtCore import QObject, QTimer
@@ -31,6 +32,7 @@ class SimpleQmlExampleApplication(QmlApplication):
             application_config_filepath=FILE_DIR / "resources/config/simple_qml_example_application_config.json",
             logging_logfile_output_dir=FILE_DIR / "log/",
             frontend_qml_file_path=FILE_DIR / "resources/frontend/frontend.qml",
+            argv=sys.argv
         )
 
         self.example_model = ExampleModel(self.application_name)

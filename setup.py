@@ -28,7 +28,7 @@ setup(
     long_description_content_type="text/markdown",
     include_package_data=True,
     install_requires=[
-        "simple_python_app==0.1.0",
+        "simple_python_app==0.1.1",
         "pyside6~=6.7.2"
     ],
     entry_points={},

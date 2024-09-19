@@ -22,6 +22,4 @@ jobs:
         with:
           python-version: ${{ matrix.python_version }}
       - run: pip install -r requirements.txt
-      - if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get update && sudo apt-get install xvfb libegl1
       - run: tox

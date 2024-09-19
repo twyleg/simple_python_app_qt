@@ -18,8 +18,8 @@ class ExampleModel(QObject, metaclass=PropertyMeta):
 
     def __init__(self, headline: str, parent: QObject | None = None):
         QObject.__init__(self, parent)
-        self.headline = headline
-        self.counter = 0
+        self.headline = headline  # type: ignore
+        self.counter = 0  # type: ignore
 
 
 class SimpleQmlExampleApplication(QmlApplication):

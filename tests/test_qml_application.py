@@ -30,7 +30,7 @@ class BaseQmlTestApplication(QmlApplication):
             **kwargs
         )
 
-    def run(self, argparser: argparse.ArgumentParser):
+    def run(self, argparser: argparse.Namespace):
         return self.open()
 
 

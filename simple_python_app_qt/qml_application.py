@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 from PySide6 import QtCore
-from PySide6.QtCore import QObject, QtMsgType, Slot, Signal, Property
+from PySide6.QtCore import QObject, QtMsgType, Slot, Signal, Property, QCoreApplication
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
@@ -24,7 +24,7 @@ class LogModel(QObject):
 
     logLineAdded = Signal(int, str, str, arguments=["levelno", "header", "msg"])
 
-    def __init__(self):
+    def __init__(self) -> None:
         QObject.__init__(self)
         self.redirect_to_prebuffer = True
         self.prebuffer_entries: List[Tuple[int, str, str]] = []
@@ -51,11 +51,11 @@ class LogModel(QObject):
     def log_level(self):
         return logging.getLevelName(logging.getLogger().level)
 
-    @Signal
+    @Signal  # type: ignore
     def log_level_changed(self):
         pass
 
-    logLevel = Property(str, log_level, notify=log_level_changed)
+    logLevel = Property(str, log_level, notify=log_level_changed)  # type: ignore
 
 
 class UiLogHandler(logging.Handler):
@@ -96,6 +96,7 @@ class QmlApplication(GenericApplication):
 
         self.frontend_qml_file_path = frontend_qml_file_path
 
+        self.app: QCoreApplication | QGuiApplication | None
         if not QGuiApplication.instance():
             self.app = QGuiApplication(sys.argv)
         else:
@@ -139,9 +140,13 @@ class QmlApplication(GenericApplication):
         logm.debug("- qml frontend filepath = %s", self.frontend_qml_file_path.absolute())
 
     def open(self) -> int:
+        if self.app is None:
+            return -1
+
         self.engine.load(self.frontend_qml_file_path)
         if not self.engine.rootObjects():
             return -1
+
         ret = self.app.exec()
 
         # Engine needs to be destroyed manually at this point to avoid errors in QmlEngine

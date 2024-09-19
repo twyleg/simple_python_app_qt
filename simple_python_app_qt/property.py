@@ -4,7 +4,7 @@ from PySide6.QtCore import QObject, Signal
 import PySide6.QtCore
 
 
-class PropertyMeta(type(QObject)):
+class PropertyMeta(type(QObject)):  # type: ignore
     """Lets a class succinctly define Qt properties."""
 
     def __new__(cls, name, bases, attrs):

@@ -79,4 +79,3 @@ class TestQmlApplication:
     ):
         test_app = NonExistingFrontendApplication()
         assert test_app.start([]) == -1
-

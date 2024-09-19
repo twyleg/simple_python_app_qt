@@ -28,7 +28,6 @@ class BaseQmlTestApplication(QmlApplication):
             application_name="test_qml_application",
             version="0.0.1",
             application_config_init_enabled=False,
-            argv=sys.argv,
             **kwargs
         )
 

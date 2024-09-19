@@ -84,7 +84,6 @@ class QmlApplication(GenericApplication):
                  application_name: str,
                  version: str,
                  frontend_qml_file_path: Path,
-                 argv: List[str],
                  **kwargs
                  ):
         super().__init__(
@@ -96,12 +95,10 @@ class QmlApplication(GenericApplication):
     # fmt: on
 
         self.frontend_qml_file_path = frontend_qml_file_path
-        self.argv = argv
 
         self.app: QCoreApplication | QGuiApplication | None
         if not QGuiApplication.instance():
-            argv = self.argv if self.argv else sys.argv
-            self.app = QGuiApplication(argv)
+            self.app = QGuiApplication(sys.argv)
         else:
             self.app = QGuiApplication.instance()
 

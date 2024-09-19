@@ -1,6 +1,7 @@
 # Copyright (C) 2024 twyleg
 # fmt: off
 import argparse
+import sys
 from pathlib import Path
 
 from simple_python_app.generic_application import GenericApplication
@@ -22,11 +23,12 @@ FILE_DIR = Path(__file__).parent
 
 class BaseQmlTestApplication(QmlApplication):
     def __init__(self, **kwargs):
+        sys.argv.extend(["-platform", "offscreen"])
         super().__init__(
             application_name="test_qml_application",
             version="0.0.1",
             application_config_init_enabled=False,
-            argv=["-platform", "offscreen"],
+            argv=sys.argv,
             **kwargs
         )
 

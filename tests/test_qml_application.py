@@ -7,8 +7,7 @@ from simple_python_app.generic_application import GenericApplication
 
 from fixtures import (
     valid_custom_logging_config,
-    project_dir,
-    print_tmp_path
+    project_dir
 )
 from simple_python_app_qt.qml_application import QmlApplication
 
@@ -80,3 +79,4 @@ class TestQmlApplication:
     ):
         test_app = NonExistingFrontendApplication()
         assert test_app.start([]) == -1
+

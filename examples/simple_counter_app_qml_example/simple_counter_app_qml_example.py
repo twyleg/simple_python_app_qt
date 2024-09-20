@@ -1,7 +1,5 @@
 # Copyright (C) 2024 twyleg
 import argparse
-import logging
-import sys
 from pathlib import Path
 
 from PySide6.QtCore import QObject, QTimer
@@ -23,13 +21,13 @@ class ExampleModel(QObject, metaclass=PropertyMeta):
         self.counter = 0  # type: ignore
 
 
-class SimpleQmlExampleApplication(QmlApplication):
+class SimpleCounterAppQmlExampleApplication(QmlApplication):
     def __init__(self):
         super().__init__(
-            application_name="simple_counter_app_example",
+            application_name="simple_counter_app_qml_example",
             version="0.0.1",
-            application_config_schema_filepath=FILE_DIR / "resources/config/simple_qml_example_application_config_schema.json",
-            application_config_filepath=FILE_DIR / "resources/config/simple_qml_example_application_config.json",
+            application_config_schema_filepath=FILE_DIR / "resources/config/simple_counter_app_qml_example_config_schema.json",
+            application_config_filepath=FILE_DIR / "resources/config/simple_counter_app_qml_example_config.json",
             logging_logfile_output_dir=FILE_DIR / "log/",
             frontend_qml_file_path=FILE_DIR / "resources/frontend/frontend.qml",
         )
@@ -47,7 +45,7 @@ class SimpleQmlExampleApplication(QmlApplication):
 
     def add_arguments(self, argparser: argparse.ArgumentParser):
         argparser.add_argument("--name", type=str, default=None, help="Application name")
-        argparser.add_argument("--delay", type=int, default=1000, help="Application name")
+        argparser.add_argument("--delay", type=int, default=1000, help="Delay (millis) for counter")
 
     def run(self, args: argparse.Namespace) -> int:
         if args.name:
@@ -57,5 +55,5 @@ class SimpleQmlExampleApplication(QmlApplication):
 
 
 if __name__ == "__main__":
-    simple_qml_example_application = SimpleQmlExampleApplication()
+    simple_qml_example_application = SimpleCounterAppQmlExampleApplication()
     simple_qml_example_application.start()

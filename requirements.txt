@@ -1,3 +1,4 @@
+# Dev
 setuptools~=73.0.1
 build~=1.2.2
 wheel~=0.44.0
@@ -7,5 +8,7 @@ black~=24.8.0
 tox~=4.18.0
 versioneer~=0.29
 pytest~=8.3.2
+
+# Runtime
 simple-python-app==0.1.1
 pyside6~=6.7.2

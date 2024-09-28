@@ -8,7 +8,7 @@ from simple_python_app_qt.property import PropertyMeta, Property
 from simple_python_app_qt.qml_application import QmlApplication
 
 
-FILE_DIR = Path(__name__).parent
+FILE_DIR = Path(__file__).parent
 
 
 class ExampleModel(QObject, metaclass=PropertyMeta):
@@ -21,7 +21,7 @@ class ExampleModel(QObject, metaclass=PropertyMeta):
         self.counter = 0  # type: ignore
 
 
-class SimpleCounterAppQmlExampleApplication(QmlApplication):
+class QmlApplicationCounterExample(QmlApplication):
     def __init__(self):
         super().__init__(
             application_name="simple_counter_app_qml_example",
@@ -55,5 +55,5 @@ class SimpleCounterAppQmlExampleApplication(QmlApplication):
 
 
 if __name__ == "__main__":
-    simple_qml_example_application = SimpleCounterAppQmlExampleApplication()
-    simple_qml_example_application.start()
+    qml_application_counter_example = QmlApplicationCounterExample()
+    qml_application_counter_example.start()

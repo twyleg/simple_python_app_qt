@@ -96,16 +96,10 @@ class QmlApplication(GenericApplication):
 
         self.frontend_qml_file_path = frontend_qml_file_path
 
-        self.app: QCoreApplication | QGuiApplication | None
-        if not QGuiApplication.instance():
-            self.app = QGuiApplication(sys.argv)
-        else:
-            self.app = QGuiApplication.instance()
+        self.app: QCoreApplication | QGuiApplication | None = None
+        self.engine: QQmlApplicationEngine | None = None
 
-        self.engine = QQmlApplicationEngine()
-
-        QtCore.qInstallMessageHandler(self.qt_message_handler)
-
+        super().add_custom_init_stage_two(self._init_stage_qml)
         super().add_custom_init_stage_two(self._init_stage_qml_logging)
         super().add_custom_init_stage_three(self._init_stage_qml_info)
 
@@ -130,6 +124,16 @@ class QmlApplication(GenericApplication):
 
     def add_model(self, model: QObject, name: str) -> None:
         self.engine.rootContext().setContextProperty(name, model)
+
+    def _init_stage_qml(self) -> None:
+        if not QGuiApplication.instance():
+            self.app = QGuiApplication(sys.argv)
+        else:
+            self.app = QGuiApplication.instance()
+
+        self.engine = QQmlApplicationEngine()
+
+        QtCore.qInstallMessageHandler(self.qt_message_handler)
 
     def _init_stage_qml_logging(self) -> None:
         self.log_model = self.find_dev_log_handler()

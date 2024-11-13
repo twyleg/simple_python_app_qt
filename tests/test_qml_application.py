@@ -66,6 +66,14 @@ class TestQmlApplication:
         test_app = ValidFrontendApplication()
         assert test_app.start() == 0
 
+    def test_QmlApplicationWithValidFrontend_StartApplicationAndRequestVersion_VersionPrinted(
+            self,
+            caplog,
+            project_dir
+    ):
+        test_app = ValidFrontendApplication()
+        assert test_app.start(["--version"]) == 0
+
     def test_QmlApplicationWithInvalidFrontend_StartApplication_ErrorThrownAndExit(
             self,
             caplog,

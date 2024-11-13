@@ -10,5 +10,5 @@ versioneer~=0.29
 pytest~=8.3.2
 
 # Runtime
-simple-python-app==0.3.0
+simple-python-app==0.4.1
 pyside6~=6.7.2

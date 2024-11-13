@@ -22,7 +22,7 @@ class ExampleModel(QObject, metaclass=PropertyMeta):
 
 
 class QmlApplicationCounterExample(QmlApplication):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             application_name="simple_counter_app_qml_example",
             version="0.0.1",
@@ -32,15 +32,12 @@ class QmlApplicationCounterExample(QmlApplication):
             frontend_qml_file_path=FILE_DIR / "resources/frontend/frontend.qml",
         )
 
-        self.example_model = ExampleModel(self.application_name)
-
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.timer_callback)
-
-        self.add_model(self.example_model, "example_model")
+        self.example_model: ExampleModel | None = None
+        self.timer: QTimer | None = None
 
     def timer_callback(self) -> None:
-        self.example_model.counter += 1
+        assert self.example_model
+        self.example_model.counter += 1  # type: ignore
         self.logm.info("Counter: %s", self.example_model.counter)
 
     def add_arguments(self, argparser: argparse.ArgumentParser):
@@ -48,6 +45,14 @@ class QmlApplicationCounterExample(QmlApplication):
         argparser.add_argument("--delay", type=int, default=1000, help="Delay (millis) for counter")
 
     def run(self, args: argparse.Namespace) -> int:
+
+        self.example_model = ExampleModel(self.application_name)
+
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.timer_callback)
+
+        self.add_model(self.example_model, "example_model")
+
         if args.name:
             self.example_model.headline = args.name
         self.timer.start(args.delay)

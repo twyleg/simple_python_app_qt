@@ -123,6 +123,7 @@ class QmlApplication(GenericApplication):
                 qml_logm.error("%s:%d: %s", context.file, context.line, message)
 
     def add_model(self, model: QObject, name: str) -> None:
+        assert self.engine
         self.engine.rootContext().setContextProperty(name, model)
 
     def _init_stage_qml(self) -> None:
@@ -147,6 +148,7 @@ class QmlApplication(GenericApplication):
         if self.app is None:
             return -1
 
+        assert self.engine
         self.engine.load(self.frontend_qml_file_path)
         if not self.engine.rootObjects():
             return -1

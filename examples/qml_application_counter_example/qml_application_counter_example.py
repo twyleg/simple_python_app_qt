@@ -22,7 +22,7 @@ class ExampleModel(QObject, metaclass=PropertyMeta):
 
 
 class QmlApplicationCounterExample(QmlApplication):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             application_name="simple_counter_app_qml_example",
             version="0.0.1",
@@ -36,7 +36,8 @@ class QmlApplicationCounterExample(QmlApplication):
         self.timer: QTimer | None = None
 
     def timer_callback(self) -> None:
-        self.example_model.counter += 1
+        assert self.example_model
+        self.example_model.counter += 1  # type: ignore
         self.logm.info("Counter: %s", self.example_model.counter)
 
     def add_arguments(self, argparser: argparse.ArgumentParser):

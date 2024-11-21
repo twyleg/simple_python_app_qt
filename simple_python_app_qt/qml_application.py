@@ -131,6 +131,7 @@ class QmlApplication(GenericApplication):
         self.engine.rootContext().setContextProperty(name, model)
 
     def _sigint_handler(self, signum: int, frame: FrameType | None):
+        assert self.app
         self.app.exit(0)
         logm.debug("Interrupted by user. Exiting...")
 

@@ -1,13 +1,16 @@
 # Copyright (C) 2024 twyleg
 import logging
 import argparse
+import os
+import signal
 import sys
 from copy import copy
 from pathlib import Path
+from types import FrameType
 from typing import List, Tuple
 
 from PySide6 import QtCore
-from PySide6.QtCore import QObject, QtMsgType, Slot, Signal, Property, QCoreApplication
+from PySide6.QtCore import QObject, QtMsgType, Slot, Signal, Property, QCoreApplication, QTimer
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
@@ -98,6 +101,7 @@ class QmlApplication(GenericApplication):
 
         self.app: QCoreApplication | QGuiApplication | None = None
         self.engine: QQmlApplicationEngine | None = None
+        self.signal_watchdog_timer: QTimer | None = None
 
         super().add_custom_init_stage_two(self._init_stage_qml)
         super().add_custom_init_stage_two(self._init_stage_qml_logging)
@@ -126,13 +130,23 @@ class QmlApplication(GenericApplication):
         assert self.engine
         self.engine.rootContext().setContextProperty(name, model)
 
+    def _sigint_handler(self, signum: int, frame: FrameType | None):
+        self.app.exit(0)
+        logm.debug("Interrupted by user. Exiting...")
+
     def _init_stage_qml(self) -> None:
+        signal.signal(signal.SIGINT, self._sigint_handler)
+
         if not QGuiApplication.instance():
             self.app = QGuiApplication(sys.argv)
         else:
             self.app = QGuiApplication.instance()
 
         self.engine = QQmlApplicationEngine()
+
+        self.signal_watchdog_timer = QTimer()
+        self.signal_watchdog_timer.timeout.connect(lambda: None)
+        self.signal_watchdog_timer.start(200)
 
         QtCore.qInstallMessageHandler(self.qt_message_handler)
 
